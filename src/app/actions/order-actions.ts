@@ -89,7 +89,7 @@ export async function createOrder(input: CreateOrderInput) {
           paymentMethod: (input.paymentMethod as any) || "NAKIT",
           paymentStatus: input.paymentMethod === "KART" ? "BEKLEMEDE" : "BEKLEMEDE",
           notes: input.notes || null,
-          status: "ONAYLANDI", // For now we assume confirmed immediately for testing
+          status: "ONAYLANDI" as any, // For now we assume confirmed immediately for testing
           items: {
             create: input.items.map((item) => ({
               productId: item.productId,
@@ -178,7 +178,7 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
     }
 
     // Create log
-    await prisma.orderLog.create({
+    await (prisma as any).orderLog.create({
       data: {
         orderId,
         status: newStatus,
@@ -210,7 +210,7 @@ export async function getLiveOrders() {
         logs: {
           orderBy: { createdAt: "desc" }
         }
-      },
+      } as any,
       orderBy: { createdAt: "desc" }
     });
   } catch (error) {

@@ -16,7 +16,7 @@ describe("calculateShareDistribution", () => {
     
     // perShareKg = 350 / 7 = 50
     // If categories are predefined percentages, checking the sum of categories
-    const totalFromCategories = result.bones + result.fat + result.leanMeat + result.premium;
+    const totalFromCategories = result.kiymaKg + result.kusbasiKg + result.kemikliKg + result.digerKg;
     expect(totalFromCategories).toBeCloseTo(result.perShareKg, 2);
   });
 

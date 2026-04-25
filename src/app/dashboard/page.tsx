@@ -86,7 +86,7 @@ export default async function DashboardPage() {
               </div>
               <div className="bg-black/40 rounded-2xl p-5 border border-[var(--taupe-surface)] hover:border-[var(--antique-gold)]/40 transition-colors">
                 <p className="text-[10px] text-[var(--antique-gold)] uppercase tracking-wider mb-2 font-bold">Aktif Siparişler</p>
-                <p className="text-3xl font-bold text-white">{user.orders.filter(o => o.status !== 'TAMAMLANDI').length}</p>
+                 <p className="text-3xl font-bold text-white">{user.orders.filter(o => (o.status as any) !== 'TAMAMLANDI').length}</p>
               </div>
               <div className="bg-black/40 rounded-2xl p-5 border border-[var(--taupe-surface)] hover:border-[var(--antique-gold)]/40 transition-colors">
                 <p className="text-[10px] text-[var(--antique-gold)] uppercase tracking-wider mb-2 font-bold">Dry-Aged Dolabı</p>

@@ -35,12 +35,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // Dinamik Rehber İçerikleri (Eğer varsa)
-    const guides = await prisma.guide.findMany({
-      select: { id: true, updatedAt: true },
+    const guides = await prisma.meatGuide.findMany({
+      select: { slug: true, updatedAt: true },
     });
 
     const guideRoutes = guides.map((guide) => ({
-      url: `${baseUrl}/rehber/${guide.id}`,
+      url: `${baseUrl}/rehber/${guide.slug}`,
       lastModified: guide.updatedAt,
       changeFrequency: 'monthly' as const,
       priority: 0.5,
