@@ -1,0 +1,52 @@
+services:
+  # ── Next.js App ──────────────────────────────
+  app:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - DATABASE_URL=postgresql://kasap_user:kasap_secret@db:5432/kasap_db
+      - NODE_ENV=development
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── PostgreSQL 16 ────────────────────────────
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: kasap_db
+      POSTGRES_USER: kasap_user
+      POSTGRES_PASSWORD: kasap_secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kasap_user -d kasap_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── pgAdmin 4 ────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - "5051:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@kasap.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,323 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String?        @unique
+  phone         String?        @unique
+  passwordHash  String?
+  role          UserRole       @default(CUSTOMER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  addresses     Address[]
+  dryAgedOrders DryAgedOrder[]
+  orders        Order[]
+  proxyConsents ProxyConsent[]
+  shares        Share[]
+}
+
+model Address {
+  id            String         @id @default(cuid())
+  userId        String?
+  label         String         @default("Ev")
+  fullName      String
+  phone         String
+  street        String
+  district      String
+  city          String
+  postalCode    String?
+  isDefault     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User?          @relation(fields: [userId], references: [id])
+  dryAgedOrders DryAgedOrder[]
+  orders        Order[]
+  shares        Share[]
+
+  @@index([userId])
+}
+
+model Product {
+  id              String      @id @default(cuid())
+  name            String
+  description     String?
+  price           Float
+  category        String
+  imageUrl        String?
+  cookingTips     String[]
+  inStock         Boolean     @default(true)
+  stockQuantityGr Int?
+  unit            ProductUnit @default(ADET)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  dryAgeDays      Int?
+  livestockId     String?
+  processingDate  DateTime    @default(now())
+  cookingPrice    Float       @default(0)
+  isCookable      Boolean     @default(false)
+  meatGuideSlug   String?
+  cartItems       CartItem[]
+  livestock       Livestock?  @relation(fields: [livestockId], references: [id])
+}
+
+model Addition {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  imageUrl    String?
+  category    String
+  inStock     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Livestock {
+  id            String    @id @default(cuid())
+  tagNumber     String    @unique
+  breed         String
+  farmOrigin    String
+  feedType      String
+  slaughterDate DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  products      Product[]
+}
+
+model MeatGuide {
+  id                   String     @id @default(cuid())
+  slug                 String     @unique
+  title                String
+  animalType           AnimalType
+  shortDesc            String
+  content              String
+  usageTips            String
+  chefTip              String?
+  imageUrl             String?
+  coverUrl             String?
+  relatedSlugs         String[]
+  breedRecommendations Json?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  @@index([animalType])
+}
+
+model Animal {
+  id            String       @id @default(cuid())
+  breed         String
+  totalKg       Float
+  status        AnimalStatus @default(BEKLEMEDE)
+  streamUrl     String?
+  slaughterDate DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  shares        Share[]
+
+  @@index([status])
+}
+
+model Share {
+  id              String             @id @default(cuid())
+  animalId        String
+  userId          String?
+  shareNumber     Int
+  customerName    String?
+  customerPhone   String?
+  customerEmail   String?
+  status          ShareStatus        @default(MUSAIT)
+  price           Float?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  addressId       String?
+  kesimGorseliUrl String?
+  timelineState   Json?
+  proxyConsent    ProxyConsent?
+  address         Address?           @relation(fields: [addressId], references: [id])
+  animal          Animal             @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  user            User?              @relation(fields: [userId], references: [id])
+  distribution    ShareDistribution?
+  payment         SharePayment?
+
+  @@unique([animalId, shareNumber])
+  @@index([customerPhone])
+  @@index([status])
+  @@index([animalId])
+}
+
+model ShareDistribution {
+  id        String @id @default(cuid())
+  shareId   String @unique
+  kiymaKg   Float
+  kusbasiKg Float
+  kemikliKg Float
+  digerKg   Float
+  totalKg   Float
+  share     Share  @relation(fields: [shareId], references: [id], onDelete: Cascade)
+}
+
+model SharePayment {
+  id         String        @id @default(cuid())
+  shareId    String        @unique
+  amount     Float
+  method     PaymentMethod @default(NAKIT)
+  status     PaymentStatus @default(BEKLEMEDE)
+  receiptUrl String?
+  notes      String?
+  paidAt     DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  share      Share         @relation(fields: [shareId], references: [id], onDelete: Cascade)
+}
+
+model ProxyConsent {
+  id            String   @id @default(cuid())
+  shareId       String   @unique
+  userId        String?
+  customerName  String
+  customerTc    String
+  signatureData String
+  consentDate   DateTime @default(now())
+  consentText   String
+  share         Share    @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  user          User?    @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  userId        String?
+  addressId     String?
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  status        OrderStatus   @default(BEKLEMEDE)
+  totalAmount   Float
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  paymentMethod PaymentMethod @default(NAKIT)
+  paymentStatus PaymentStatus @default(BEKLEMEDE)
+  logs          OrderLog[]
+  items         CartItem[]
+  address       Address?      @relation(fields: [addressId], references: [id])
+  user          User?         @relation(fields: [userId], references: [id])
+
+  @@index([customerPhone])
+  @@index([status])
+}
+
+model CartItem {
+  id           String   @id @default(cuid())
+  productId    String
+  orderId      String?
+  quantity     Int      @default(1)
+  weightGr     Int?
+  butcherNotes String?
+  createdAt    DateTime @default(now())
+  order        Order?   @relation(fields: [orderId], references: [id])
+  product      Product  @relation(fields: [productId], references: [id])
+}
+
+model OrderLog {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  status    String
+  message   String
+  payload   String?  // JSON string of webhook or technical data
+  createdAt DateTime @default(now())
+}
+
+model DryAgedOrder {
+  id            String        @id @default(cuid())
+  userId        String?
+  addressId     String?
+  customerName  String
+  customerPhone String
+  meatType      String
+  startWeightKg Float
+  endWeightKg   Float?
+  agingDays     Int
+  startDate     DateTime      @default(now())
+  endDate       DateTime
+  status        DryAgedStatus @default(DINLENIYOR)
+  temperature   Float?
+  humidity      Float?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  address       Address?      @relation(fields: [addressId], references: [id])
+  user          User?         @relation(fields: [userId], references: [id])
+
+  @@index([customerPhone])
+  @@index([status])
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  BUTCHER
+}
+
+enum AnimalStatus {
+  BEKLEMEDE
+  KESILDI
+  PARCALANDI
+}
+
+enum ShareStatus {
+  MUSAIT
+  REZERVE
+  SATILDI
+  TESLIM
+}
+
+enum PaymentStatus {
+  BEKLEMEDE
+  ONAYLANDI
+  IADE
+}
+
+enum PaymentMethod {
+  NAKIT
+  HAVALE
+  KART
+}
+
+enum OrderStatus {
+  ODEME_BEKLENIYOR
+  ONAYLANDI
+  HAZIRLANIYOR
+  YOLDA
+  TAMAMLANDI
+  IPTAL
+  BEKLEMEDE
+}
+
+enum DryAgedStatus {
+  DINLENIYOR
+  HAZIR
+  TESLIM
+}
+
+enum AnimalType {
+  BUYUKBAS
+  KUCUKBAS
+}
+
+enum ProductUnit {
+  ADET
+  KG
+  GR
+}
+
+enum ServiceType {
+  RAW
+  COOKED
+}

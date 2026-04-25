@@ -1,0 +1,1 @@
+TRUNCATE TABLE "OrderItem", "Order" CASCADE;

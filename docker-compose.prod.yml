@@ -1,0 +1,140 @@
+services:
+  # ── Next.js App (Production) ───────────────────────
+  app:
+    build:
+      context: .
+      target: runner
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=production
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+
+  # ── Database Migrations ──────────────────────────
+  migrate:
+    build:
+      context: .
+      target: builder
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    command: npx prisma migrate deploy
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── PostgreSQL 16 ────────────────────────────
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "127.0.0.1:5433:5432" # Sadece localhost'tan erişim (Güvenlik)
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-kasap_db}
+      - POSTGRES_USER=${POSTGRES_USER:-kasap_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kasap_user} -d ${POSTGRES_DB:-kasap_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # ── Redis (For Queue & Cache) ────────────────
+  redis:
+    image: redis:alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  # ── Background Worker ────────────────────────
+  worker:
+    build:
+      context: .
+      target: dev # Using dev stage for simplicity as it has tsx/ts-node and all source files
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NODE_ENV=production
+    command: npx tsx worker-entry.ts
+    depends_on:
+      redis:
+        condition: service_started
+      db:
+        condition: service_healthy
+    restart: always
+
+  # ── Nginx (Reverse Proxy & SSL) ───────────────
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - app
+      - pgadmin
+    restart: always
+
+  # ── pgAdmin 4 ────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@kasap.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    depends_on:
+      - db
+    restart: always
+
+  # ── Certbot (SSL Management) ─────────────────
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
+
+  # ── Database Backup (S3) ──────────────────────
+  backup:
+    image: prodrigestivill/postgres-backup-s3:latest
+    environment:
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - S3_BUCKET=${S3_BUCKET}
+      - S3_REGION=${S3_REGION}
+      - S3_ENDPOINT=${S3_ENDPOINT}
+      - S3_PREFIX=backups
+      - POSTGRES_HOST=db
+      - POSTGRES_DATABASE=${POSTGRES_DB:-kasap_db}
+      - POSTGRES_USER=${POSTGRES_USER:-kasap_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  postgres_data:
+  redis_data:

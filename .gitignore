@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/public/uploads
+
+# prisma generated (runtime'da oluşturulur)
+prisma/generated-client/
+prisma/generated-client/**
+
+# build artifacts
+build.log
