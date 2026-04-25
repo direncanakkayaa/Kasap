@@ -1,7 +1,21 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Phone, MessageCircle } from "lucide-react";
+import { Phone, MessageCircle, Check } from "lucide-react";
 
 export default function CTASection() {
+  const [copied, setCopied] = useState(false);
+
+  const handlePhoneClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (window.innerWidth >= 1024) {
+      e.preventDefault();
+      navigator.clipboard.writeText("+905551234567");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <section className="section-padding relative overflow-hidden">
       {/* Background */}
@@ -26,13 +40,14 @@ export default function CTASection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
             href="tel:+905551234567"
+            onClick={handlePhoneClick}
             className="flex items-center gap-3 px-8 py-4 text-sm font-semibold
-                     text-deep-espresso bg-antique-gold rounded-full hover:bg-antique-antique-gold-light
+                     text-deep-espresso bg-antique-gold rounded-full hover:bg-antique-gold/90
                      transition-all duration-300
                      hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] w-full sm:w-auto justify-center"
           >
-            <Phone size={18} />
-            +90 555 123 45 67
+            {copied ? <Check size={18} /> : <Phone size={18} />}
+            {copied ? "Kopyalandı!" : "+90 555 123 45 67"}
           </a>
 
           <a

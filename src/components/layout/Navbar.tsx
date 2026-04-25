@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, ShoppingCart, User, LogOut, ChevronDown, Phone, MessageSquare, ShieldCheck } from "lucide-react";
+import { Menu, X, ShoppingCart, User, LogOut, ChevronDown, Phone, MessageSquare, ShieldCheck, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-store";
 
@@ -24,6 +24,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { data: session, status } = useSession();
   const itemCount = useCart((s) => s.getItemCount());
+  const [copied, setCopied] = useState(false);
 
   // Hydration-safe cart count
   const [mounted, setMounted] = useState(false);
@@ -36,6 +37,15 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handlePhoneClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (window.innerWidth >= 1024) {
+      e.preventDefault();
+      navigator.clipboard.writeText("+905551234567");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <nav
@@ -166,6 +176,7 @@ export default function Navbar() {
             {/* Primary CTA */}
             <a
               href="tel:+905551234567"
+              onClick={handlePhoneClick}
               className={cn(
                 "flex items-center gap-2 font-bold transition-all duration-300 rounded-full",
                 isScrolled
@@ -173,8 +184,10 @@ export default function Navbar() {
                   : "bg-antique-gold text-deep-espresso px-6 py-2.5 text-sm shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
               )}
             >
-              <Phone size={isScrolled ? 14 : 16} />
-              <span className={cn(isScrolled ? "block" : "hidden sm:block")}>Bizi Arayın</span>
+              {copied ? <Check size={isScrolled ? 14 : 16} /> : <Phone size={isScrolled ? 14 : 16} />}
+              <span className={cn(isScrolled ? "block" : "hidden sm:block")}>
+                {copied ? "Kopyalandı" : "Bizi Arayın"}
+              </span>
             </a>
 
             {/* Mobile Toggle */}
