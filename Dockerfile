@@ -38,6 +38,7 @@ FROM node:20-alpine AS runner
 RUN apk add --no-cache openssl curl
 WORKDIR /app
 ENV NODE_ENV=production
+RUN npm install -g prisma
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
@@ -52,4 +53,4 @@ USER nextjs
 
 EXPOSE 3000
 ENV HOSTNAME="0.0.0.0"
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js db push --accept-data-loss && node prisma/seed-guides.js && node prisma/seed-products.js && node server.js"]
+CMD ["sh", "-c", "prisma db push --skip-generate --accept-data-loss ; node prisma/seed-guides.js ; node prisma/seed-products.js ; node server.js"]
