@@ -30,6 +30,17 @@ export default async function ProductGrid() {
 
         {/* Client Side Logic for Filtering and Modals */}
         <ProductGridClient products={products} additions={additions} />
+
+        {/* See All Button */}
+        <div className="mt-16 text-center">
+          <a
+            href="/urunler"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-white/5 border border-white/10 text-ivory font-bold rounded-2xl hover:bg-white/10 hover:border-antique-gold/30 transition-all group"
+          >
+            Tüm Ürünleri Gör
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
+          </a>
+        </div>
       </div>
     </section>
   );
