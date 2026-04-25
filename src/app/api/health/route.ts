@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Redis } from 'ioredis';
 
+// Helper for timeout
+const withTimeout = <T>(promise: Promise<T>, ms: number, errorMessage: string): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(errorMessage)), ms))
+  ]);
+};
+
 export async function GET() {
   const healthStatus: any = {
     status: 'healthy',
@@ -13,8 +21,12 @@ export async function GET() {
   };
 
   try {
-    // Check DB
-    await prisma.$queryRaw`SELECT 1`;
+    // Check DB with 3 second timeout
+    await withTimeout(
+      prisma.$queryRaw`SELECT 1`,
+      3000,
+      "Database connection timed out"
+    );
     healthStatus.services.database = 'connected';
   } catch (error: any) {
     console.error("[Healthcheck] DB Error:", error.message || error);
@@ -24,9 +36,19 @@ export async function GET() {
   }
 
   try {
-    // Check Redis
-    const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-    const pong = await redis.ping();
+    // Check Redis with 3 second timeout
+    const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+      connectTimeout: 3000,
+      maxRetriesPerRequest: 1,
+      retryStrategy: () => null // Do not retry on failure for healthcheck
+    });
+    
+    const pong = await withTimeout(
+      redis.ping(),
+      3000,
+      "Redis ping timed out"
+    );
+    
     if (pong === 'PONG') {
       healthStatus.services.redis = 'connected';
     }
