@@ -3,6 +3,8 @@ node_modules
 .git
 .gitignore
 *.md
+.env
 .env*.local
+.env.production
 docker-compose.yml
 .dockerignore
