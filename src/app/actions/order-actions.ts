@@ -111,7 +111,7 @@ export async function createOrder(input: CreateOrderInput) {
       return newOrder;
     });
 
-    // Send SMS Notification (via Queue)
+    // Send SMS Notification (via Queue) - Isolated to prevent Redis errors from failing the order
     try {
       const hasCooked = input.items.some(item => item.serviceType === "COOKED");
       const hasRaw = input.items.some(item => item.serviceType === "RAW");
@@ -121,12 +121,14 @@ export async function createOrder(input: CreateOrderInput) {
       if (hasCooked && !hasRaw) templateId = "ORDER_CONFIRM_YEMEK";
       else if (hasRaw && !hasCooked) templateId = "ORDER_CONFIRM_ET";
 
-      await addSmsJob(templateId, order.customerPhone, {
+      // Non-blocking call
+      addSmsJob(templateId, order.customerPhone, {
         customerName: order.customerName,
         orderId: order.id
-      });
-    } catch (queueError) {
-      logger.error({ error: queueError }, "Failed to queue SMS");
+      }).catch(e => logger.error({ error: e.message }, "Async SMS Job Error"));
+      
+    } catch (queueError: any) {
+      logger.error({ error: queueError.message || "Unknown Queue Error" }, "Failed to initiate SMS process");
     }
 
     logger.info({ orderId: order.id, customer: order.customerPhone }, "Sipariş başarıyla oluşturuldu");
