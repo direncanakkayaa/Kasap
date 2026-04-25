@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Flame, ChefHat, ShoppingCart, Check, Info, Minus, Plus, CheckCircle, Scale } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
@@ -39,7 +39,7 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
   const [selectedAdditions, setSelectedAdditions] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const addItem = useCart((s) => s.addItem);
-  
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -52,10 +52,11 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
 
   const unitPrice = (product.price * weight) + (isCooked ? product.cookingPrice : 0);
   const additionsTotal = additions.filter(a => selectedAdditions.includes(a.id)).reduce((sum, a) => sum + a.price, 0);
+  const [showSuccess, setShowSuccess] = useState(false);
   const totalPrice = (unitPrice + additionsTotal) * quantity;
 
   const toggleAddition = (id: string) => {
-    setSelectedAdditions(prev => 
+    setSelectedAdditions(prev =>
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
     );
   };
@@ -101,7 +102,7 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center">
         {/* Backdrop */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -110,7 +111,7 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
         />
 
         {/* Modal / Bottom Sheet */}
-        <motion.div 
+        <motion.div
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -123,11 +124,11 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
         >
           {/* Mobile Handle Bar */}
           <div className="md:hidden w-full flex justify-center pt-4 pb-2 shrink-0">
-             <div className="w-12 h-1.5 bg-white/10 rounded-full" />
+            <div className="w-12 h-1.5 bg-white/10 rounded-full" />
           </div>
 
           {/* Close Button (Desktop Only) */}
-          <button 
+          <button
             onClick={onClose}
             className="hidden md:flex absolute top-6 right-6 z-50 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white/60 hover:text-white transition-colors"
           >
@@ -136,8 +137,8 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
 
           {/* Left: Product Image & Info */}
           <div className="w-full md:w-5/12 relative aspect-[16/10] md:aspect-auto bg-charcoal-black shrink-0">
-            <img 
-              src={product.imageUrl} 
+            <img
+              src={product.imageUrl}
               alt={product.name}
               className="w-full h-full object-cover"
             />
@@ -146,21 +147,21 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
               <span className="text-antique-gold font-semibold text-[10px] tracking-widest uppercase mb-1 block">Premium Seçim</span>
               <h2 className="text-xl md:text-3xl font-display font-bold text-white mb-1 md:mb-2">{product.name}</h2>
               <div className="flex items-center gap-2 text-ivory/60 text-xs">
-                 <Info size={12} />
-                 <span>Taze ve günlük kesim</span>
+                <Info size={12} />
+                <span>Taze ve günlük kesim</span>
               </div>
             </div>
           </div>
 
           {/* Right: Options & Checkout */}
           <div className="w-full md:w-7/12 p-6 md:p-12 overflow-y-auto bg-[url('/noise.png')]">
-            
+
             {/* Service Toggle */}
             {product.isCookable && (
               <div className="mb-8">
                 <label className="text-[10px] font-bold text-ivory/40 uppercase tracking-widest mb-4 block">Hazırlanış Biçimi</label>
                 <div className="grid grid-cols-2 gap-4">
-                  <button 
+                  <button
                     onClick={() => setIsCooked(false)}
                     className={`flex items-center gap-3 p-4 rounded-2xl border transition-all duration-300 ${!isCooked ? 'bg-antique-gold/10 border-antique-gold text-antique-gold' : 'bg-white/5 border-white/10 text-ivory/40 hover:border-white/20'}`}
                   >
@@ -172,7 +173,7 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
                     </div>
                   </button>
 
-                  <button 
+                  <button
                     onClick={() => setIsCooked(true)}
                     className={`flex items-center gap-3 p-4 rounded-2xl border transition-all duration-300 ${isCooked ? 'bg-orange-500/10 border-orange-500 text-orange-500 font-bold' : 'bg-white/5 border-white/10 text-ivory/40 hover:border-white/20'}`}
                   >
@@ -209,23 +210,23 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
                   ))}
                 </div>
                 <div className="flex items-center gap-4 bg-black/40 p-4 rounded-2xl border border-white/5">
-                   <div className="flex-1">
-                      <p className="text-[10px] text-ivory/40 uppercase tracking-widest mb-1">Özel Gramaj</p>
-                      <div className="flex items-center gap-2">
-                         <input 
-                           type="number" 
-                           step="0.05"
-                           value={weight}
-                           onChange={(e) => setWeight(parseFloat(e.target.value))}
-                           className="bg-transparent text-xl font-bold text-white focus:outline-none w-20"
-                         />
-                         <span className="text-antique-gold font-bold">KG</span>
-                      </div>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-[10px] text-ivory/40 uppercase tracking-widest mb-1">KG Fiyatı</p>
-                      <p className="text-ivory font-bold">₺{product.price}</p>
-                   </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] text-ivory/40 uppercase tracking-widest mb-1">Özel Gramaj</p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        step="0.05"
+                        value={weight}
+                        onChange={(e) => setWeight(parseFloat(e.target.value))}
+                        className="bg-transparent text-xl font-bold text-white focus:outline-none w-20"
+                      />
+                      <span className="text-antique-gold font-bold">KG</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-ivory/40 uppercase tracking-widest mb-1">KG Fiyatı</p>
+                    <p className="text-ivory font-bold">₺{product.price}</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -235,14 +236,14 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
               <label className="text-[10px] font-bold text-ivory/40 uppercase tracking-widest mb-4 block">Paket/Adet Sayısı</label>
               <div className="flex items-center gap-6">
                 <div className="flex items-center bg-white/5 rounded-2xl border border-white/10 p-2">
-                  <button 
+                  <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="p-3 hover:bg-white/5 rounded-xl transition-colors text-ivory"
                   >
                     <Minus size={18} />
                   </button>
                   <span className="w-16 text-center font-display text-2xl font-bold text-white">{quantity}</span>
-                  <button 
+                  <button
                     onClick={() => setQuantity(quantity + 1)}
                     className="p-3 hover:bg-white/5 rounded-xl transition-colors text-ivory"
                   >
