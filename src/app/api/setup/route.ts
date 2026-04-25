@@ -62,16 +62,37 @@ export async function GET() {
     if (productsCount === 0) {
       await prisma.product.createMany({
         data: [
+          // 🥩 KIRMIZI ET
           {
             name: "Premium Dana Antrikot",
-            description: "Angus ve Simental ırklarından seçilmiş.",
+            description: "Angus ve Simental ırklarından seçilmiş, mermerleşme oranı yüksek.",
             price: 650,
             category: "kirmizi-et",
             imageUrl: "/generated/angus.png",
-            cookingTips: ["Döküm tavada mühürleyin"],
+            cookingTips: ["Döküm tavada mühürleyin", "Orta pişmiş önerilir"],
             isCookable: true,
             cookingPrice: 85,
             meatGuideSlug: "dana-antrikot",
+            unit: "KG"
+          },
+          {
+            name: "Dana Bonfile (Lop Et)",
+            description: "Sıfır yağ, sıfır sinir. Pamuk gibi yumuşak doku.",
+            price: 850,
+            category: "kirmizi-et",
+            imageUrl: "/generated/limuzin.png",
+            cookingTips: ["Tereyağı ile banyo yaptırın"],
+            isCookable: true,
+            cookingPrice: 95,
+            meatGuideSlug: "dana-bonfile",
+            unit: "KG"
+          },
+          {
+            name: "Dana Kıyma (%20 Yağlı)",
+            description: "Yemeklik ve köftelik ideal yağ dengesi.",
+            price: 380,
+            category: "kirmizi-et",
+            imageUrl: "/generated/yerlikara.png",
             unit: "KG"
           },
           {
@@ -85,12 +106,73 @@ export async function GET() {
             cookingPrice: 65,
             meatGuideSlug: "kuzu-pirzola",
             unit: "KG"
+          },
+          // 🌭 ŞARKÜTERİ
+          {
+            name: "Ev Yapımı Kasap Sucuğu",
+            description: "Doğal bağırsakta, 0 katkı maddeli, özel baharatlı.",
+            price: 550,
+            category: "sarkuteri",
+            imageUrl: "/generated/story_modern.png",
+            unit: "KG"
+          },
+          {
+            name: "Antrikot Pastırma",
+            description: "Çemenli, geleneksel yöntemlerle kurutulmuş.",
+            price: 1200,
+            category: "sarkuteri",
+            imageUrl: "/generated/story_quality.png",
+            unit: "KG"
+          },
+          // 🍔 KÖFTELER
+          {
+            name: "Özel Kasap Köftesi",
+            description: "Anne eli değmiş gibi, ızgaralık özel harçlı köfte.",
+            price: 450,
+            category: "kofteler",
+            imageUrl: "/generated/story_modern.png",
+            isCookable: true,
+            cookingPrice: 40,
+            unit: "KG"
+          },
+          {
+            name: "Satır Köfte",
+            description: "Eti zırh ile çekilmiş, gerçek lezzet.",
+            price: 480,
+            category: "kofteler",
+            imageUrl: "/generated/story_quality.png",
+            isCookable: true,
+            cookingPrice: 45,
+            unit: "KG"
           }
         ]
       });
     }
 
-    return NextResponse.json({ message: "Veritabanı başarıyla dolduruldu! (Seeded)" });
+    // 3. Yan Ürünler/Soslar Ekle
+    const additionsCount = await prisma.addition.count();
+    if (additionsCount === 0) {
+      await prisma.addition.createMany({
+        data: [
+          {
+            name: "Trüflü Mayonez",
+            description: "Etlerinizin yanına gurme bir dokunuş.",
+            price: 65,
+            category: "sos",
+            imageUrl: "https://images.unsplash.com/photo-1546241072-48010ad28c2c?w=400"
+          },
+          {
+            name: "Acılı Kasap Sosu",
+            description: "Kendi yapımımız taze acı sos.",
+            price: 45,
+            category: "sos",
+            imageUrl: "https://images.unsplash.com/photo-1546241072-48010ad28c2c?w=400"
+          }
+        ]
+      });
+    }
+
+    return NextResponse.json({ message: "Veritabanı zenginleştirilmiş ürünlerle başarıyla dolduruldu! (Seeded)" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || String(error) }, { status: 500 });
   }
