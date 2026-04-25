@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
+  const dbUrl = process.env.DATABASE_URL || "";
+  const maskedUrl = dbUrl.replace(/:.*@/, ":****@");
+  console.log("[Setup Debug] Connecting to:", maskedUrl);
+  
   try {
     // 1. Et Rehberi Verilerini Ekle
     const guidesCount = await prisma.meatGuide.count();
