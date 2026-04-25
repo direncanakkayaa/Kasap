@@ -131,8 +131,12 @@ export async function createOrder(input: CreateOrderInput) {
 
     logger.info({ orderId: order.id, customer: order.customerPhone }, "Sipariş başarıyla oluşturuldu");
     return { success: true, orderId: order.id, data: order };
-  } catch (error) {
-    logger.error({ error, input }, "createOrder error");
+  } catch (error: any) {
+    logger.error({ 
+      error: error.message || String(error), 
+      stack: error.stack,
+      input 
+    }, "createOrder error");
     return {
       success: false,
       error: "Sipariş oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
