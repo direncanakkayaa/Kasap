@@ -51,6 +51,5 @@ export default withSentryConfig(nextConfig, {
   org: "erdogan-kasap",
   project: "kasap-frontend",
   authToken: process.env.SENTRY_AUTH_TOKEN,
-  disableSourceMaps: !process.env.SENTRY_AUTH_TOKEN,
   telemetry: false,
 });
