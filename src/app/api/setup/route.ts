@@ -1,12 +1,33 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 export async function GET() {
   const dbUrl = process.env.DATABASE_URL || "";
   const maskedUrl = dbUrl.replace(/:.*@/, ":****@");
   console.log("[Setup Debug] Connecting to:", maskedUrl);
-  
+
   try {
+    // 0. Admin Kullanıcısı Ekle
+    const adminPhone = "05555555555";
+    const existingAdmin = await prisma.user.findUnique({
+      where: { phone: adminPhone }
+    });
+
+    if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+      await prisma.user.create({
+        data: {
+          name: "Erdoğan Usta",
+          email: "admin@erdogankasap.com",
+          phone: adminPhone,
+          passwordHash: hashedPassword,
+          role: "ADMIN"
+        }
+      });
+      console.log("✓ Admin kullanıcısı oluşturuldu: 05555555555 / admin123");
+    }
+
     // 1. Et Rehberi Verilerini Ekle
     const guidesCount = await prisma.meatGuide.count();
     if (guidesCount === 0) {
