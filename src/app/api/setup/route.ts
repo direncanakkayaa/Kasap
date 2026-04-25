@@ -57,125 +57,106 @@ export async function GET() {
       });
     }
 
-    // 2. Ürünleri Ekle
-    const productsCount = await prisma.product.count();
-    if (productsCount === 0) {
-      await prisma.product.createMany({
-        data: [
-          // 🥩 KIRMIZI ET
-          {
-            name: "Premium Dana Antrikot",
-            description: "Angus ve Simental ırklarından seçilmiş, mermerleşme oranı yüksek.",
-            price: 650,
-            category: "kirmizi-et",
-            imageUrl: "/generated/angus.png",
-            cookingTips: ["Döküm tavada mühürleyin", "Orta pişmiş önerilir"],
-            isCookable: true,
-            cookingPrice: 85,
-            meatGuideSlug: "dana-antrikot",
-            unit: "KG"
-          },
-          {
-            name: "Dana Bonfile (Lop Et)",
-            description: "Sıfır yağ, sıfır sinir. Pamuk gibi yumuşak doku.",
-            price: 850,
-            category: "kirmizi-et",
-            imageUrl: "/generated/limuzin.png",
-            cookingTips: ["Tereyağı ile banyo yaptırın"],
-            isCookable: true,
-            cookingPrice: 95,
-            meatGuideSlug: "dana-bonfile",
-            unit: "KG"
-          },
-          {
-            name: "Dana Kıyma (%20 Yağlı)",
-            description: "Yemeklik ve köftelik ideal yağ dengesi.",
-            price: 380,
-            category: "kirmizi-et",
-            imageUrl: "/generated/yerlikara.png",
-            unit: "KG"
-          },
-          {
-            name: "Kuzu Pirzola (Trakya Kıvırcık)",
-            description: "Kokusuz, süt kuzusu narinliğinde pirzola.",
-            price: 780,
-            category: "kirmizi-et",
-            imageUrl: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?w=800",
-            cookingTips: ["Mangal ateşinde hızlı pişirim"],
-            isCookable: true,
-            cookingPrice: 65,
-            meatGuideSlug: "kuzu-pirzola",
-            unit: "KG"
-          },
-          {
-            name: "Kuzu İncik (Fırınlık)",
-            description: "Uzun pişirimler için ideal, kemiğinden ayrılan eşsiz lezzet.",
-            price: 520,
-            category: "kirmizi-et",
-            imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?w=800",
-            unit: "KG"
-          },
-          {
-            name: "Dana Rosto (Nuarlı)",
-            description: "Yağsız, sinirsiz, dilimlemeye uygun fırınlık et.",
-            price: 490,
-            category: "kirmizi-et",
-            imageUrl: "https://images.unsplash.com/photo-1558030006-450675393462?w=800",
-            unit: "KG"
-          },
-          {
-            name: "Dana Yaprak Ciğer",
-            description: "Günlük taze, zarından ayıklanmış, yaprak kesim.",
-            price: 350,
-            category: "sarkuteri",
-            imageUrl: "https://images.unsplash.com/photo-1529692236671-f1f6e9460272?w=800",
-            unit: "KG"
-          },
-          {
-            name: "Dana Antrikot Pastırma",
-            description: "Çemenli, geleneksel yöntemlerle kurutulmuş, el kesimi.",
-            price: 1350,
-            category: "sarkuteri",
-            imageUrl: "https://images.unsplash.com/photo-1541529086526-db283c563270?w=800",
-            unit: "KG"
-          },
-          {
-            name: "Özel Kasap Köftesi",
-            description: "Anne eli değmiş gibi, ızgaralık özel harçlı köfte.",
-            price: 450,
-            category: "kofteler",
-            imageUrl: "https://images.unsplash.com/photo-1534127395081-e862e3d02711?w=800",
-            isCookable: true,
-            cookingPrice: 40,
-            unit: "KG"
-          },
-          {
-            name: "Gurme Burger Köftesi (200gr)",
-            description: "%100 Dana eti, özel yağ dengesiyle sulu burger deneyimi.",
-            price: 120,
-            category: "kofteler",
-            imageUrl: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800",
-            isCookable: true,
-            cookingPrice: 35,
-            unit: "ADET"
-          },
-          {
-            name: "Satır Köfte",
-            description: "Eti zırh ile çekilmiş, gerçek lezzet.",
-            price: 480,
-            category: "kofteler",
-            imageUrl: "https://images.unsplash.com/photo-1529692236671-f1f6e9460272?w=800",
-            isCookable: true,
-            cookingPrice: 45,
-            unit: "KG"
-          }
-        ]
-      });
-    }
+    // 2. Ürünleri Ekle (Önce temizle sonra ekle - Ürünler sayfasının dolması için)
+    await prisma.product.deleteMany({}); 
+    
+    await prisma.product.createMany({
+      data: [
+        // 🥩 KIRMIZI ET
+        {
+          name: "Premium Dana Antrikot",
+          description: "Angus ve Simental ırklarından seçilmiş, mermerleşme oranı yüksek premium lezzet.",
+          price: 650,
+          category: "kirmizi-et",
+          imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?w=800",
+          cookingTips: ["Döküm tavada mühürleyin", "Orta pişmiş önerilir"],
+          isCookable: true,
+          cookingPrice: 85,
+          meatGuideSlug: "dana-antrikot",
+          unit: "KG"
+        },
+        {
+          name: "Dana Bonfile (Lop Et)",
+          description: "Sıfır yağ, sıfır sinir. Pamuk gibi yumuşak doku.",
+          price: 850,
+          category: "kirmizi-et",
+          imageUrl: "https://images.unsplash.com/photo-1558030006-450675393462?w=800",
+          cookingTips: ["Tereyağı ile banyo yaptırın"],
+          isCookable: true,
+          cookingPrice: 95,
+          unit: "KG"
+        },
+        {
+          name: "Kuzu Pirzola (Trakya Kıvırcık)",
+          description: "Kokusuz, süt kuzusu narinliğinde pirzola.",
+          price: 780,
+          category: "kirmizi-et",
+          imageUrl: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?w=800",
+          cookingTips: ["Mangal ateşinde hızlı pişirim"],
+          isCookable: true,
+          cookingPrice: 65,
+          meatGuideSlug: "kuzu-pirzola",
+          unit: "KG"
+        },
+        {
+          name: "Kuzu İncik (Fırınlık)",
+          description: "Uzun pişirimler için ideal, kemiğinden ayrılan eşsiz lezzet.",
+          price: 520,
+          category: "kirmizi-et",
+          imageUrl: "https://images.unsplash.com/photo-1596450514735-2440214e2d3d?w=800",
+          unit: "KG"
+        },
+        // 🌭 ŞARKÜTERİ
+        {
+          name: "Ev Yapımı Kasap Sucuğu",
+          description: "Doğal bağırsakta, 0 katkı maddeli, özel baharatlı efsane lezzet.",
+          price: 550,
+          category: "sarkuteri",
+          imageUrl: "https://images.unsplash.com/photo-1541529086526-db283c563270?w=800",
+          unit: "KG"
+        },
+        {
+          name: "Dana Yaprak Ciğer",
+          description: "Günlük taze, zarından ayıklanmış, yaprak kesim.",
+          price: 350,
+          category: "sarkuteri",
+          imageUrl: "https://images.unsplash.com/photo-1529692236671-f1f6e9460272?w=800",
+          unit: "KG"
+        },
+        {
+          name: "Antrikot Pastırma",
+          description: "Çemenli, geleneksel yöntemlerle kurutulmuş, el kesimi özel seri.",
+          price: 1350,
+          category: "sarkuteri",
+          imageUrl: "https://images.unsplash.com/photo-1541529086526-db283c563270?w=800",
+          unit: "KG"
+        },
+        // 🍔 KÖFTELER
+        {
+          name: "Özel Kasap Köftesi",
+          description: "Anne eli değmiş gibi, ızgaralık özel harçlı köfte.",
+          price: 450,
+          category: "kofteler",
+          imageUrl: "https://images.unsplash.com/photo-1534127395081-e862e3d02711?w=800",
+          isCookable: true,
+          cookingPrice: 40,
+          unit: "KG"
+        },
+        {
+          name: "Gurme Burger Köftesi (200gr)",
+          description: "%100 Dana eti, özel yağ dengesiyle sulu burger deneyimi.",
+          price: 120,
+          category: "kofteler",
+          imageUrl: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800",
+          isCookable: true,
+          cookingPrice: 35,
+          unit: "ADET"
+        }
+      ]
+    });
 
     // 3. Yan Ürünler/Soslar Ekle
-    const additionsCount = await prisma.addition.count();
-    if (additionsCount === 0) {
+    await prisma.addition.deleteMany({});
       await prisma.addition.createMany({
         data: [
           {
