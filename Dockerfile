@@ -53,4 +53,4 @@ USER nextjs
 
 EXPOSE 3000
 ENV HOSTNAME="0.0.0.0"
-CMD ["sh", "-c", "prisma db push --skip-generate --accept-data-loss ; node prisma/seed-guides.js ; node prisma/seed-products.js ; node server.js"]
+CMD ["node", "server.js"]
