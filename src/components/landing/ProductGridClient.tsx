@@ -23,17 +23,17 @@ export default function ProductGridClient({ products, additions }: { products: a
 
   return (
     <>
-      {/* Category Filter */}
-      <div className="flex flex-wrap justify-center gap-2 mb-10">
+      {/* Category Filter - Mobile Horizontal Scroll */}
+      <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 mb-8 pb-2 px-2 -mx-2 lg:flex-wrap lg:justify-center lg:overflow-visible lg:px-0 lg:mx-0">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.key}
             onClick={() => setActiveCategory(cat.key)}
             className={cn(
-              "px-5 py-2 text-sm font-medium rounded-full transition-all duration-300",
+              "px-6 py-2.5 text-xs font-bold rounded-xl transition-all duration-300 whitespace-nowrap uppercase tracking-widest",
               activeCategory === cat.key
-                ? "bg-antique-gold text-deep-espresso shadow-lg"
-                : "bg-taupe-surface text-ivory/60 border border-white/5 hover:border-antique-gold/30 hover:text-ivory"
+                ? "bg-antique-gold text-deep-espresso shadow-[0_0_20px_rgba(212,175,55,0.3)] scale-105"
+                : "bg-taupe-surface text-ivory/40 border border-white/5 hover:border-antique-gold/30 hover:text-ivory"
             )}
           >
             {cat.label}

@@ -9,7 +9,7 @@ export default async function ProductGrid() {
   ]);
 
   return (
-    <section id="urunler" className="section-padding relative">
+    <section id="urunler" className="section-padding relative pb-32 sm:pb-24">
       {/* Top Accent */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-antique-gold/20 to-transparent" />
 

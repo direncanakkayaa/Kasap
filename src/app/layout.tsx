@@ -64,7 +64,7 @@ export default function RootLayout({
         <QueryProvider>
           <AuthProvider>
             <Navbar />
-            <main className="flex-1 pt-20">{children}</main>
+            <main className="flex-1 pt-20 lg:pb-0 pb-20">{children}</main>
             <Footer />
             <GurmeChatBot />
           </AuthProvider>

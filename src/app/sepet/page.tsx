@@ -164,7 +164,8 @@ export default function SepetPage() {
   if (!mounted) return null;
 
   return (
-    <main className="min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black to-[var(--deep-espresso)]/40">
+    <>
+    <main className="min-h-screen pt-32 pb-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black to-[var(--deep-espresso)]/40">
       <div className="max-w-6xl mx-auto">
         
         {/* Progress Stepper */}
@@ -485,5 +486,36 @@ export default function SepetPage() {
         </div>
       </div>
     </main>
+
+    {/* MOBILE STICKY CHECKOUT BAR */}
+    {mounted && items.length > 0 && (
+      <div className="lg:hidden fixed bottom-20 left-0 right-0 z-[55] px-4 animate-slide-up">
+        <div className="bg-deep-espresso/90 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-4 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.6)]">
+          <div className="pl-4">
+            <p className="text-[10px] text-ivory/40 font-bold uppercase tracking-widest">Toplam</p>
+            <p className="text-2xl font-bold text-antique-gold">₺{grandTotal.toFixed(0)}</p>
+          </div>
+          
+          {authStatus !== "authenticated" ? (
+            <Link 
+              href="/login?callbackUrl=/sepet"
+              className="bg-white/10 text-white font-bold px-8 py-4 rounded-2xl flex items-center gap-2 border border-white/20"
+            >
+              Giriş Yap
+            </Link>
+          ) : (
+            <button 
+              onClick={handleCheckout}
+              disabled={isSubmitting}
+              className="bg-antique-gold text-deep-espresso font-bold px-8 py-4 rounded-2xl flex items-center gap-2 shadow-lg active:scale-95 transition-all"
+            >
+              {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />}
+              {step === "review" ? "Devam" : step === "address" ? "Ödeme" : "Onayla"}
+            </button>
+          )}
+        </div>
+      </div>
+    )}
+    </>
   );
 }

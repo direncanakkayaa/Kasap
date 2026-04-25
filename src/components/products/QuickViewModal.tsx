@@ -37,9 +37,16 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
   const [weight, setWeight] = useState(product.unit === "KG" ? 0.5 : 1); // 500gr default for KG or 1 unit
   const [quantity, setQuantity] = useState(1);
   const [selectedAdditions, setSelectedAdditions] = useState<string[]>([]);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const addItem = useCart((s) => s.addItem);
   
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Weights (in KG)
   const SUGGESTED_WEIGHTS = [0.25, 0.5, 0.75, 1, 1.5, 2];
 
@@ -84,9 +91,15 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
 
   if (!isOpen) return null;
 
+  const modalVariants = {
+    hidden: isMobile ? { y: "100%" } : { opacity: 0, scale: 0.9, y: 20 },
+    visible: isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 },
+    exit: isMobile ? { y: "100%" } : { opacity: 0, scale: 0.9, y: 20 }
+  };
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center">
         {/* Backdrop */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -96,41 +109,51 @@ export default function QuickViewModal({ product, additions, isOpen, onClose }: 
           className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         />
 
-        {/* Modal */}
+        {/* Modal / Bottom Sheet */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-4xl bg-deep-espresso border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col md:flex-row"
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className={cn(
+            "relative bg-deep-espresso border-white/10 overflow-hidden shadow-2xl flex flex-col md:flex-row",
+            "w-full max-h-[92vh] rounded-t-[2.5rem] border-t md:rounded-[2.5rem] md:max-w-4xl md:border md:max-h-[90vh]"
+          )}
         >
-          {/* Close Button */}
+          {/* Mobile Handle Bar */}
+          <div className="md:hidden w-full flex justify-center pt-4 pb-2 shrink-0">
+             <div className="w-12 h-1.5 bg-white/10 rounded-full" />
+          </div>
+
+          {/* Close Button (Desktop Only) */}
           <button 
             onClick={onClose}
-            className="absolute top-6 right-6 z-50 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white/60 hover:text-white transition-colors"
+            className="hidden md:flex absolute top-6 right-6 z-50 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white/60 hover:text-white transition-colors"
           >
             <X size={20} />
           </button>
 
           {/* Left: Product Image & Info */}
-          <div className="w-full md:w-5/12 relative aspect-square md:aspect-auto bg-charcoal-black">
+          <div className="w-full md:w-5/12 relative aspect-[16/10] md:aspect-auto bg-charcoal-black shrink-0">
             <img 
               src={product.imageUrl} 
               alt={product.name}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-            <div className="absolute bottom-8 left-8 right-8">
-              <span className="text-antique-gold font-semibold text-xs tracking-widest uppercase mb-2 block">Premium Seçim</span>
-              <h2 className="text-3xl font-display font-bold text-white mb-2">{product.name}</h2>
-              <div className="flex items-center gap-2 text-ivory/60 text-sm">
-                 <Info size={14} />
+            <div className="absolute bottom-4 left-6 right-6 md:bottom-8 md:left-8 md:right-8">
+              <span className="text-antique-gold font-semibold text-[10px] tracking-widest uppercase mb-1 block">Premium Seçim</span>
+              <h2 className="text-xl md:text-3xl font-display font-bold text-white mb-1 md:mb-2">{product.name}</h2>
+              <div className="flex items-center gap-2 text-ivory/60 text-xs">
+                 <Info size={12} />
                  <span>Taze ve günlük kesim</span>
               </div>
             </div>
           </div>
 
           {/* Right: Options & Checkout */}
-          <div className="w-full md:w-7/12 p-8 md:p-12 overflow-y-auto max-h-[90vh] bg-[url('/noise.png')]">
+          <div className="w-full md:w-7/12 p-6 md:p-12 overflow-y-auto bg-[url('/noise.png')]">
             
             {/* Service Toggle */}
             {product.isCookable && (
