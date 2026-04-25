@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
 import RehberClient from "./RehberClient";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Et Rehberi — Kasap Erdoğan",
