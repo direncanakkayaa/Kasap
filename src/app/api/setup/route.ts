@@ -175,7 +175,6 @@ export async function GET() {
           }
         ]
       });
-    }
 
     return NextResponse.json({ message: "Veritabanı zenginleştirilmiş ürünlerle başarıyla dolduruldu! (Seeded)" });
   } catch (error: any) {
